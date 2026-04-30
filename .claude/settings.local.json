@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/91798/.claude/plugins/cache/ui-ux-pro-max-skill/ui-ux-pro-max/2.5.0/**)",
+      "Bash(python skills/ui-ux-pro-max/scripts/search.py \"interior design luxury service landing page dark gold\" --design-system -p \"Aura Interiors\")",
+      "Bash(py --version)",
+      "Bash(where python *)",
+      "Bash(py skills/ui-ux-pro-max/scripts/search.py \"interior design luxury service landing page dark gold\" --design-system -p \"Aura Interiors\")",
+      "Bash(vercel *)",
+      "PowerShell(vercel *)",
+      "Bash(git --version)",
+      "Bash(gh --version)",
+      "Bash(git init *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git remote *)",
+      "Bash(git branch *)",
+      "Bash(git push *)",
+      "Bash(git pull *)"
+    ]
+  }
+}
