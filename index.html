@@ -500,43 +500,6 @@
             transform: translateY(-3px);
         }
 
-        /* --- Floating WhatsApp Chat Widget --- */
-        .wa-float-widget {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            gap: 0.5rem;
-        }
-        .wa-chat-bubble {
-            background: #25D366;
-            color: #fff;
-            padding: 0.75rem 1.4rem;
-            border-radius: 30px;
-            text-decoration: none;
-            font-weight: 700;
-            font-size: 0.95rem;
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
-            box-shadow: 0 4px 20px rgba(37,211,102,0.4);
-            transition: all 0.3s ease;
-            animation: pulse-wa 2.5s infinite;
-        }
-        .wa-chat-bubble:hover {
-            background: #1ebe5d;
-            transform: scale(1.05);
-            box-shadow: 0 6px 28px rgba(37,211,102,0.5);
-        }
-        @keyframes pulse-wa {
-            0%, 100% { box-shadow: 0 4px 20px rgba(37,211,102,0.4); }
-            50% { box-shadow: 0 4px 30px rgba(37,211,102,0.7); }
-        }
-        .wa-chat-bubble i { font-size: 1.2rem; }
-
         @media (max-width: 768px) {
             .bottom-cta h2 { font-size: 2.2rem; }
             .services-list-grid { grid-template-columns: 1fr 1fr; }
@@ -1137,21 +1100,6 @@
         </div>
         <p>&copy; 2026 Aura Interiors. All rights reserved. | Founded by Lokesh Kumar Gadhi | <a href="#" style="color: rgba(255,255,255,0.4);">Privacy</a></p>
     </footer>
-
-    <!-- ================================================
-         FLOATING WHATSAPP CHAT WIDGET
-         ================================================ -->
-    <div class="wa-float-widget" id="wa-float-widget">
-        <a href="https://wa.me/917981058016?text=Hi%20I%20need%20interior%20design%20consultation"
-           class="wa-chat-bubble"
-           target="_blank"
-           rel="noopener noreferrer"
-           id="wa-float-btn"
-           aria-label="Chat on WhatsApp">
-            <i class="fa-brands fa-whatsapp"></i>
-            <span>Chat on WhatsApp</span>
-        </a>
-    </div>
 
     <!-- Mobile Call Button -->
     <a href="tel:+919059072432" class="call-btn-fixed" id="mobile-call-fixed">
