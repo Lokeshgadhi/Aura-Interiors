@@ -1,10 +1,10 @@
 (function () {
   if (typeof braze === 'undefined') return;
 
-  braze.initialize("YOUR_WEB_SDK_API_KEY", {
+  braze.initialize("98219d01-43d8-4704-bac4-d4f2fe2e2c60", {
     baseUrl: "sdk.fra-02.braze.eu",
     serviceWorkerLocation: "/service-worker.js",
-    enableLogging: true
+    enableLogging: true // set to false before production
   });
 
   braze.openSession();
