@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 braze.logCustomEvent("form_submitted", {
                     source_page: window.BRAZE_PAGE_NAME || document.title
                 });
-                var emailField = document.getElementById('contact-email');
+                const emailField = document.getElementById('contact-email');
                 if (emailField && emailField.value) {
                     braze.getUser().setEmail(emailField.value);
                 }
@@ -193,6 +193,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const chatbotInput = document.getElementById('chatbot-input');
     const chatbotSend = document.getElementById('chatbot-send');
     const chatbotMessages = document.getElementById('chatbot-messages');
+
+    if (!chatbotToggle || !chatbotContainer || !chatbotClose || !chatbotInput || !chatbotSend || !chatbotMessages) return;
 
     // Toggle chatbot
     chatbotToggle.addEventListener('click', () => {
