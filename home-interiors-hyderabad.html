@@ -136,8 +136,32 @@ gtag('config', 'G-N0H3NL65C2');
         <p>&copy; 2026 Aura Interiors. All rights reserved. | Founded by Lokesh Kumar Gadhi | <a href="#">Privacy</a></p>
     </footer>
 
-    <a href="https://wa.me/917981058016?text=Hi%20I%20need%20interior%20design" class="whatsapp-float"><i class="fa-brands fa-whatsapp"></i></a>
+    <!-- AI Chatbot Widget -->
+    <div class="chatbot-widget" id="chatbot-widget">
+        <div class="chatbot-toggle" id="chatbot-toggle">
+            <i class="fa-solid fa-robot"></i>
+        </div>
+        <div class="chatbot-container" id="chatbot-container">
+            <div class="chatbot-header">
+                <h4>Aura AI Assistant</h4>
+                <span class="chatbot-close" id="chatbot-close">&times;</span>
+            </div>
+            <div class="chatbot-messages" id="chatbot-messages">
+                <div class="message bot-message">
+                    <div class="message-content">Hi! I'm Aura's AI assistant. How can I help you with your interior design needs today?</div>
+                </div>
+            </div>
+            <div class="chatbot-input">
+                <input type="text" id="chatbot-input" placeholder="Ask me about our services..." />
+                <button id="chatbot-send"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
     <script src="script.js"></script>
+<script src="https://js.appboycdn.com/web-sdk/4.10/braze.min.js"></script>
+<script>window.BRAZE_PAGE_NAME = "Home Interiors";</script>
+<script src="/braze-init.js"></script>
 </body>
 
 </html>
