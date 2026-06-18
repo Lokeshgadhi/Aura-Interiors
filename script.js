@@ -9,39 +9,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 1. Navbar Scroll Effect
     window.addEventListener('scroll', () => {
-        if (window.scrollY > 50) {
-            nav.style.padding = '1rem 5%';
-            nav.style.background = 'rgba(9, 11, 15, 0.85)';
-            nav.style.boxShadow = '0 4px 30px rgba(0, 0, 0, 0.5)';
-        } else {
-            nav.style.padding = '1.5rem 5%';
-            nav.style.background = 'rgba(9, 11, 15, 0.7)';
-            nav.style.boxShadow = 'none';
-        }
+        nav.classList.toggle('scrolled', window.scrollY > 50);
     }, { passive: true });
 
     // 2. Mobile Menu Toggle
+    const closeMobileMenu = () => {
+        navLinks.classList.remove('active');
+        const icon = mobileMenu.querySelector('i');
+        icon.classList.remove('fa-xmark');
+        icon.classList.add('fa-bars');
+    };
+
     if (mobileMenu) {
         mobileMenu.addEventListener('click', () => {
-            navLinks.classList.toggle('active');
+            const isOpen = navLinks.classList.toggle('active');
             const icon = mobileMenu.querySelector('i');
-            if (navLinks.classList.contains('active')) {
-                icon.classList.remove('fa-bars');
-                icon.classList.add('fa-xmark');
-                navLinks.style.display = 'flex';
-                navLinks.style.flexDirection = 'column';
-                navLinks.style.position = 'absolute';
-                navLinks.style.top = '100%';
-                navLinks.style.left = '0';
-                navLinks.style.width = '100%';
-                navLinks.style.background = 'rgba(9, 11, 15, 0.95)';
-                navLinks.style.padding = '2rem';
-            } else {
-                icon.classList.remove('fa-xmark');
-                icon.classList.add('fa-bars');
-                navLinks.style.display = '';
-            }
+            icon.classList.toggle('fa-bars', !isOpen);
+            icon.classList.toggle('fa-xmark', isOpen);
         });
+
+        // Reset mobile nav state when resizing back to desktop
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) {
+                closeMobileMenu();
+            }
+        }, { passive: true });
     }
 
     // 3. Smooth Anchor Scroll (For proper targets)
@@ -180,10 +172,319 @@ const hideLoader = () => {
     }
 };
 
-window.addEventListener('load', hideLoader);
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-// Fallback: Force hide loader after 3 seconds in case of slow/failed asset loading (e.g. Unsplash placeholders)
+window.addEventListener('load', () => {
+    hideLoader();
+    initStatsCounter();
+    initLightbox();
+    initSwiper();
+    initScrollProgress();
+
+    // Motion-heavy enhancements — skipped for reduced-motion users
+    if (!prefersReducedMotion) {
+        initHeroParticles();
+        initScrollAnimations();
+        initCursor();
+        initTilt();
+        initMagnetic();
+
+        // Safety net: re-measure trigger positions after fonts/images settle,
+        // and force-reveal any reveal target still stuck hidden in the viewport.
+        setTimeout(() => {
+            if (typeof ScrollTrigger !== 'undefined') ScrollTrigger.refresh();
+            document.querySelectorAll('.price-card, .testimonials-swiper, .why-card-v2, .service-list-item, .stat-item')
+                .forEach(el => {
+                    const r = el.getBoundingClientRect();
+                    const inView = r.top < window.innerHeight && r.bottom > 0;
+                    if (inView && parseFloat(getComputedStyle(el).opacity) === 0) {
+                        el.style.opacity = '1';
+                        el.style.transform = 'none';
+                    }
+                });
+        }, 1200);
+    }
+});
+
 setTimeout(hideLoader, 3000);
+
+// ============================================================
+// THREE.JS — Hero Particle Field
+// ============================================================
+function initHeroParticles() {
+    if (typeof THREE === 'undefined') return;
+    const canvas = document.getElementById('hero-canvas');
+    if (!canvas) return;
+
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.z = 4;
+
+    // Primary gold particles
+    const count = 1800;
+    const positions = new Float32Array(count * 3);
+    for (let i = 0; i < count; i++) {
+        positions[i * 3]     = (Math.random() - 0.5) * 18;
+        positions[i * 3 + 1] = (Math.random() - 0.5) * 18;
+        positions[i * 3 + 2] = (Math.random() - 0.5) * 10;
+    }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    const mat = new THREE.PointsMaterial({ color: 0xd4af37, size: 0.028, transparent: true, opacity: 0.7, sizeAttenuation: true });
+    scene.add(new THREE.Points(geo, mat));
+
+    // Secondary white dust
+    const count2 = 700;
+    const pos2 = new Float32Array(count2 * 3);
+    for (let i = 0; i < count2 * 3; i++) pos2[i] = (Math.random() - 0.5) * 22;
+    const geo2 = new THREE.BufferGeometry();
+    geo2.setAttribute('position', new THREE.BufferAttribute(pos2, 3));
+    const mat2 = new THREE.PointsMaterial({ color: 0xffffff, size: 0.012, transparent: true, opacity: 0.25 });
+    const particles2 = new THREE.Points(geo2, mat2);
+    scene.add(particles2);
+
+    const particles = scene.children[0];
+    let targetX = 0, targetY = 0;
+
+    document.addEventListener('mousemove', (e) => {
+        targetX = (e.clientX / window.innerWidth - 0.5);
+        targetY = (e.clientY / window.innerHeight - 0.5);
+    }, { passive: true });
+
+    let smoothX = 0, smoothY = 0;
+    const clock = new THREE.Clock();
+
+    (function animate() {
+        requestAnimationFrame(animate);
+        const t = clock.getElapsedTime();
+        smoothX += (targetX - smoothX) * 0.04;
+        smoothY += (targetY - smoothY) * 0.04;
+
+        particles.rotation.y  = t * 0.05 + smoothX * 0.35;
+        particles.rotation.x  = t * 0.02 + smoothY * 0.2;
+        particles2.rotation.y = -t * 0.025;
+
+        camera.position.x += (smoothX * 0.5 - camera.position.x) * 0.04;
+        camera.position.y += (-smoothY * 0.5 - camera.position.y) * 0.04;
+        camera.lookAt(scene.position);
+
+        renderer.render(scene, camera);
+    })();
+
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    }, { passive: true });
+}
+
+// ============================================================
+// GSAP — Scroll-triggered animations
+// ============================================================
+function initScrollAnimations() {
+    if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
+    gsap.registerPlugin(ScrollTrigger);
+
+    const fade = (targets, trigger, extra = {}) => {
+        gsap.from(targets, {
+            scrollTrigger: { trigger, start: 'top 82%', toggleActions: 'play none none none' },
+            y: 45, opacity: 0, duration: 0.75, ease: 'power3.out',
+            ...extra
+        });
+    };
+
+    fade('.section-header', '.section-header');
+    fade('.service-list-item', '.services-list-grid', { stagger: 0.07 });
+    fade('.why-card-v2',      '.why-grid-v2',        { stagger: 0.1  });
+    fade('.price-card',       '.pricing-cards-grid', { stagger: 0.15, y: 55 });
+    fade('.step-item',        '.steps-timeline',     { stagger: 0.1  });
+    fade('.stat-item',        '.stats-grid',         { stagger: 0.1  });
+
+    gsap.from('.about-text', {
+        scrollTrigger: { trigger: '.about', start: 'top 78%' },
+        x: -60, opacity: 0, duration: 0.9, ease: 'power3.out'
+    });
+    gsap.from('.about-visual', {
+        scrollTrigger: { trigger: '.about', start: 'top 78%' },
+        x: 60, opacity: 0, duration: 0.9, ease: 'power3.out'
+    });
+    gsap.from('.portfolio-item', {
+        scrollTrigger: { trigger: '.portfolio-grid', start: 'top 80%' },
+        scale: 0.9, opacity: 0, duration: 0.65, stagger: 0.12, ease: 'power2.out'
+    });
+    // NOTE: do NOT GSAP-animate `.testimonial-card` — those live inside the
+    // Swiper carousel (which clones slides for looping). Setting opacity:0 on
+    // them leaves the carousel blank. Animate the whole container once instead.
+    gsap.from('.testimonials-swiper', {
+        scrollTrigger: { trigger: '.testimonials', start: 'top 80%' },
+        y: 40, opacity: 0, duration: 0.7, ease: 'power3.out'
+    });
+
+    // Recalculate all trigger positions once layout has fully settled
+    // (fonts loaded, hero canvas sized, async images in). Without this,
+    // lower sections (pricing, testimonials) can mis-measure and stay hidden.
+    ScrollTrigger.refresh();
+}
+
+// ============================================================
+// Animated stats counter (Intersection Observer)
+// ============================================================
+function initStatsCounter() {
+    const els = document.querySelectorAll('.stat-number');
+    if (!els.length) return;
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (!entry.isIntersecting) return;
+            observer.unobserve(entry.target);
+            const el = entry.target;
+            const target = parseFloat(el.dataset.target);
+            const isFloat = el.dataset.type === 'float';
+            const duration = 2000;
+            const startTime = performance.now();
+
+            (function tick(now) {
+                const elapsed = now - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const eased = 1 - Math.pow(1 - progress, 3);
+                el.textContent = isFloat
+                    ? (eased * target).toFixed(1)
+                    : Math.floor(eased * target);
+                if (progress < 1) requestAnimationFrame(tick);
+            })(startTime);
+        });
+    }, { threshold: 0.6 });
+
+    els.forEach(el => observer.observe(el));
+}
+
+// ============================================================
+// GLightbox — portfolio image lightbox
+// ============================================================
+function initLightbox() {
+    if (typeof GLightbox === 'undefined') return;
+    GLightbox({
+        selector: '.glightbox',
+        touchNavigation: true,
+        loop: true,
+        autoplayVideos: false,
+        skin: 'clean',
+        closeEffect: 'fade',
+        openEffect: 'fade'
+    });
+}
+
+// ============================================================
+// Swiper — testimonials carousel
+// ============================================================
+function initSwiper() {
+    if (typeof Swiper === 'undefined') return;
+    new Swiper('.testimonials-swiper', {
+        slidesPerView: 1,
+        spaceBetween: 24,
+        loop: true,
+        autoplay: { delay: 4800, disableOnInteraction: false, pauseOnMouseEnter: true },
+        pagination: { el: '.swiper-pagination', clickable: true },
+        navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
+        breakpoints: { 768: { slidesPerView: 2 } }
+    });
+}
+
+// ============================================================
+// Custom cursor with lag + hover expand
+// ============================================================
+function initCursor() {
+    const dot  = document.getElementById('cursor-dot');
+    const ring = document.getElementById('cursor-ring');
+    if (!dot || !ring) return;
+
+    let dotX = 0, dotY = 0, ringX = 0, ringY = 0;
+
+    document.addEventListener('mousemove', (e) => {
+        dotX = e.clientX;
+        dotY = e.clientY;
+    }, { passive: true });
+
+    (function loop() {
+        ringX += (dotX - ringX) * 0.12;
+        ringY += (dotY - ringY) * 0.12;
+        dot.style.left  = dotX  + 'px';
+        dot.style.top   = dotY  + 'px';
+        ring.style.left = ringX + 'px';
+        ring.style.top  = ringY + 'px';
+        requestAnimationFrame(loop);
+    })();
+
+    const targets = 'a, button, .cta-btn, .portfolio-item, .service-list-item, .why-card-v2, .price-card, .chatbot-toggle';
+    document.querySelectorAll(targets).forEach(el => {
+        el.addEventListener('mouseenter', () => ring.classList.add('hover'));
+        el.addEventListener('mouseleave', () => ring.classList.remove('hover'));
+    });
+}
+
+// ============================================================
+// 3D interactive tilt on cards (vanilla, no library)
+// ============================================================
+function initTilt() {
+    const cards = document.querySelectorAll('.price-card, .why-card-v2, .service-list-item, .glass-card');
+    const MAX = 9; // max tilt degrees
+
+    cards.forEach(card => {
+        card.style.transformStyle = 'preserve-3d';
+        card.style.willChange = 'transform';
+
+        card.addEventListener('mouseenter', () => {
+            card.style.transition = 'transform 0.05s linear';
+        });
+
+        card.addEventListener('mousemove', (e) => {
+            const r = card.getBoundingClientRect();
+            const px = (e.clientX - r.left) / r.width  - 0.5;
+            const py = (e.clientY - r.top)  / r.height - 0.5;
+            card.style.transform =
+                `perspective(900px) rotateY(${px * MAX}deg) rotateX(${-py * MAX}deg) translateY(-4px)`;
+        });
+
+        card.addEventListener('mouseleave', () => {
+            card.style.transition = 'transform 0.5s cubic-bezier(0.25, 1, 0.5, 1)';
+            card.style.transform = '';
+        });
+    });
+}
+
+// ============================================================
+// Magnetic pull on primary CTA buttons
+// ============================================================
+function initMagnetic() {
+    const buttons = document.querySelectorAll('.cta-btn.primary, .cta-btn.whatsapp-btn, .chatbot-toggle');
+    buttons.forEach(btn => {
+        btn.addEventListener('mousemove', (e) => {
+            const r = btn.getBoundingClientRect();
+            const x = e.clientX - r.left - r.width / 2;
+            const y = e.clientY - r.top - r.height / 2;
+            btn.style.transform = `translate(${x * 0.25}px, ${y * 0.35}px)`;
+        });
+        btn.addEventListener('mouseleave', () => {
+            btn.style.transform = '';
+        });
+    });
+}
+
+// ============================================================
+// Scroll Progress Bar
+// ============================================================
+function initScrollProgress() {
+    const bar = document.getElementById('scroll-progress');
+    if (!bar) return;
+    window.addEventListener('scroll', () => {
+        const total = document.documentElement.scrollHeight - window.innerHeight;
+        bar.style.width = (window.scrollY / total * 100) + '%';
+    }, { passive: true });
+}
 
 // 7. AI Chatbot Functionality
 document.addEventListener('DOMContentLoaded', () => {
